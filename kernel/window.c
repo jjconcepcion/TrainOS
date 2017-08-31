@@ -41,6 +41,17 @@ void show_cursor(WINDOW* wnd)
 
 void clear_window(WINDOW* wnd)
 {
+	int x, y;
+	/* erase window contents */
+	for(y = 0; y < wnd->height; y++) {
+		for(x = 0; x < wnd->width; x++) {
+			poke_screen(x + wnd->x, y + wnd->y, 0);
+		}
+	}
+	/* place cursor at top left corner of window */
+	wnd->cursor_x = 0;
+	wnd->cursor_y = 0;
+	show_cursor(wnd);
 }
 
 
