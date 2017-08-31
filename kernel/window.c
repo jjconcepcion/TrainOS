@@ -15,6 +15,27 @@ WORD peek_screen(int x, int y) {
 	return peek_w(SCREEN_BASE_ADDR + y * SCREEN_WIDTH * 2 + x * 2);
 }
 
+void scroll_window(WINDOW* wnd) {
+	int x, y, wx, wy;
+	/* shift entire window contents up one line */
+	for (y = 1; y < wnd->height; y++) {
+		wy = wnd->y + y;
+		for (x = 0; x < wnd->width; x++) {
+			wx = wnd->x + x;
+			WORD ch = peek_screen(wx, wy);
+			poke_screen(wx, wy-1, ch);
+		}
+	}
+	/* clear last line */
+	y = wnd->y + wnd->height - 1;
+	for (wx = 0; wx < wnd->width; wx++) {
+		x = wnd->x + wx;
+		poke_screen(x, y, 0);
+	}
+	wnd->cursor_x = 0;
+	wnd->cursor_y = wnd->height - 1;
+}
+
 void move_cursor(WINDOW* wnd, int x, int y)
 {
 	assert(x >= 0 && x < wnd->width && y >= 0 && y < wnd->height);
@@ -41,11 +62,13 @@ void show_cursor(WINDOW* wnd)
 
 void clear_window(WINDOW* wnd)
 {
-	int x, y;
+	int x, y, wx, wy;
 	/* erase window contents */
-	for(y = 0; y < wnd->height; y++) {
-		for(x = 0; x < wnd->width; x++) {
-			poke_screen(x + wnd->x, y + wnd->y, 0);
+	for (y = 0; y < wnd->height; y++) {
+		wy = y + wnd->y;
+		for (x = 0; x < wnd->width; x++) {
+			wx = x + wnd->x;
+			poke_screen(wx, wy, 0);
 		}
 	}
 	/* place cursor at top left corner of window */
@@ -57,12 +80,46 @@ void clear_window(WINDOW* wnd)
 
 void output_char(WINDOW* wnd, unsigned char c)
 {
+	remove_cursor(wnd);
+	switch (c) {
+		case '\n':
+			wnd->cursor_x = 0;
+			wnd->cursor_y++;
+			break;
+		case '\b':
+			if (wnd->cursor_x != 0) {
+				wnd->cursor_x--;
+			} else {
+				if (wnd->cursor_y != 0) {
+					wnd->cursor_y--;
+					wnd->cursor_x = wnd->width - 1;
+				}
+			}
+			break;
+		default:
+			poke_screen(wnd->x + wnd->cursor_x,
+						wnd->y + wnd->cursor_y,
+						(WORD) c | (DEFAULT_CH_COLOR << 8));
+			wnd->cursor_x++;
+			if (wnd->cursor_x == wnd->width) {
+				wnd->cursor_x = 0;
+				wnd->cursor_y++;
+			}
+			break;
+	}
+	/* scroll window */
+	if (wnd->cursor_y == wnd->height)
+		scroll_window(wnd);
+	show_cursor(wnd);
 }
 
 
 
 void output_string(WINDOW* wnd, const char *str)
 {
+	while(*str != '\0') {
+		output_char(wnd, *str++);
+	}
 }
 
 
