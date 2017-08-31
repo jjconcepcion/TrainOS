@@ -5,6 +5,8 @@
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
 
+const WORD DEFAULT_CH_COLOR = 0x0F;
+
 void poke_screen(int x, int y, WORD ch) {
 	poke_w(SCREEN_BASE_ADDR + y * SCREEN_WIDTH * 2 + x * 2, ch);
 }
@@ -15,16 +17,25 @@ WORD peek_screen(int x, int y) {
 
 void move_cursor(WINDOW* wnd, int x, int y)
 {
+	assert(x >= 0 && x < wnd->width && y >= 0 && y < wnd->height);
+	wnd->cursor_x = x;
+	wnd->cursor_y = y;
 }
 
 
 void remove_cursor(WINDOW* wnd)
 {
+	poke_screen(wnd->x + wnd->cursor_x,
+				wnd->y + wnd->cursor_y,
+				' ');
 }
 
 
 void show_cursor(WINDOW* wnd)
 {
+	poke_screen(wnd->x + wnd->cursor_x,
+				wnd->y + wnd->cursor_y,
+				wnd->cursor_char | (DEFAULT_CH_COLOR << 8));
 }
 
 
