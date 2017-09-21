@@ -74,6 +74,7 @@ void remove_ready_queue (PROCESS proc)
             queue_tail = queue_head->prev;
             queue_new_head->prev = queue_tail;
             queue_tail->next = queue_new_head;
+            ready_queue[proc->priority] = queue_new_head;
         }
     } else {
     /* removal of process not at head of queue */
