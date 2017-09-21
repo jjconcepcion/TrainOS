@@ -3,7 +3,7 @@
 
 
 PCB pcb[MAX_PROCS];
-
+PCB *next_free_pcb;
 
 PORT create_process (void (*ptr_to_new_proc) (PROCESS, PARAM),
 		     int prio,
@@ -48,4 +48,10 @@ void init_process()
 		pcb[i].magic = 0;
 		pcb[i].used = FALSE;
 	}
+
+	/* create list of available PCBs */
+	for (i = 1; i < MAX_PROCS - 1; i++)
+		pcb[i].next = &pcb[i + 1];
+	pcb[MAX_PROCS - 1].next = NULL;
+	next_free_pcb = &pcb[1];
 }
