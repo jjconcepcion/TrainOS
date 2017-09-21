@@ -65,6 +65,32 @@ void add_ready_queue (PROCESS proc)
 
 void remove_ready_queue (PROCESS proc)
 {
+    assert(proc != NULL);
+    assert(proc->priority >= 0
+        && proc->priority < MAX_READY_QUEUES);
+    PROCESS queue_head,
+            queue_tail,
+            queue_new_head;
+
+    queue_head = ready_queue[proc->priority];
+    if (proc == queue_head) {
+        if (proc == queue_head->next) {
+        /* remove solitary process */
+            ready_queue[proc->priority] = NULL;
+        } else {
+            queue_new_head = queue_head->next;
+            queue_tail = queue_head->prev;
+            queue_new_head->prev = queue_tail;
+            queue_tail->next = queue_new_head;
+        }
+    } else {
+    /* removal of process not at head of queue */
+        proc->prev->next = proc->next;
+        proc->next->prev = proc->prev;
+    }
+
+    /* unset dangling links */
+    proc->prev = proc->next = NULL;
 }
 
 
