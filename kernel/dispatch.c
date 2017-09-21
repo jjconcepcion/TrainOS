@@ -143,4 +143,11 @@ void resign()
 
 void init_dispatcher()
 {
+    int i;
+    for(i = 0; i < MAX_READY_QUEUES; i++) {
+        ready_queue[i] = NULL;
+    }
+
+    /* Add first process */
+    add_ready_queue(active_proc);
 }
