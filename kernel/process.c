@@ -71,12 +71,52 @@ PROCESS fork()
 
 
 
-void print_process(WINDOW* wnd, PROCESS p)
+void print_process_details(WINDOW* wnd, PROCESS p)
 {
+	static const char *state[] = {
+		"READY          ",
+		"SEND_BLOCKED   ",
+		"REPLY_BLOCKED  ",
+		"RECEIVE_BLOCKED",
+		"MESSAGE_BLOCKED",
+		"INTR_BLOCKED   "
+	};
+
+	output_string(wnd, state[p->state]);
+	if (p == active_proc)
+		output_string(wnd, " *       ");
+	else
+		output_string(wnd, "         ");
+	/* print priority in ASCII */
+	output_string(wnd, p->priority + 48);
+	output_string(wnd, " ");
+	output_string(wnd, p->name);
+	output_char(wnd, '\n');
+
 }
+
+
+void print_process_header(WINDOW* wnd) {
+	output_string(wnd, "State           Active Prio Name\n");
+	output_string(wnd, "---------------------------------------\n");
+}
+
+
+void print_process(WINDOW* wnd, PROCESS p) {
+	print_process_header(wnd);
+	print_process_details(wnd, p);
+}
+
 
 void print_all_processes(WINDOW* wnd)
 {
+	int i;
+
+	print_process_header(wnd);
+	for (i = 0; i < MAX_PROCS; i++) {
+		if (pcb[i].used == TRUE)
+			print_process_details(wnd, &pcb[i]);
+	}
 }
 
 
