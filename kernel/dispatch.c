@@ -24,6 +24,7 @@ PCB *ready_queue [MAX_READY_QUEUES];
 void add_ready_queue (PROCESS proc)
 {
     assert(proc != NULL);
+    assert(proc->magic == MAGIC_PCB);
     assert(proc->priority >= 0
         && proc->priority < MAX_READY_QUEUES);
     PROCESS queue_head, queue_tail;
@@ -56,6 +57,7 @@ void add_ready_queue (PROCESS proc)
 void remove_ready_queue (PROCESS proc)
 {
     assert(proc != NULL);
+    assert(proc->magic == MAGIC_PCB);
     assert(proc->priority >= 0
         && proc->priority < MAX_READY_QUEUES);
     PROCESS queue_head,
