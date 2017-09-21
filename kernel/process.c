@@ -88,7 +88,7 @@ void print_process_details(WINDOW* wnd, PROCESS p)
 	else
 		output_string(wnd, "         ");
 	/* print priority in ASCII */
-	output_string(wnd, p->priority + 48);
+	output_char(wnd, p->priority + 48);
 	output_string(wnd, " ");
 	output_string(wnd, p->name);
 	output_char(wnd, '\n');
