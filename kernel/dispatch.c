@@ -132,6 +132,30 @@ PROCESS dispatcher()
  */
 void resign()
 {
+    /* Save context of current process */
+    asm("pushl %eax");
+    asm("pushl %ecx");
+    asm("pushl %edx");
+    asm("pushl %ebx");
+    asm("pushl %ebp");
+    asm("pushl %esi");
+    asm("pushl %edi");
+    /* Save the stack pointer to the PCB */
+    asm ("movl %%esp,%0" : "=r" (active_proc->esp) : );
+    /* Select a new process to run */
+    active_proc = dispatcher();
+    /* Load the stack pointer from the PCB */
+    asm ("movl %0,%%esp" : : "r" (active_proc->esp));
+    /* Restore context of new process */
+    asm("popl %edi");
+    asm("popl %esi");
+    asm("popl %ebp");
+    asm("popl %ebx");
+    asm("popl %edx");
+    asm("popl %ecx");
+    asm("popl %eax");
+    /*return to new process  */
+    asm("ret");
 }
 
 
