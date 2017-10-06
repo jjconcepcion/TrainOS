@@ -99,23 +99,17 @@ void remove_ready_queue (PROCESS proc)
 PROCESS dispatcher()
 {
     PROCESS new_proc;
-    int p, prio, new_prio;
+    int p, prio;
 
-    new_prio = -1;
-    prio = active_proc->priority;
-    for (p = prio + 1; p < MAX_READY_QUEUES; p++) {
-    /* Find available higher priority queues */
+    for (p = 0; p < MAX_READY_QUEUES; p++) {
         if (ready_queue[p] != NULL)
-            new_prio = p;
+            prio = p;
     }
 
-    if (new_prio > prio) {
-    /* dispatch higher priority process*/
-        new_proc = ready_queue[new_prio];
-    } else {
-    /* Round robin selection */
+    if (prio == active_proc->priority)
         new_proc = active_proc->next;
-    }
+    else
+        new_proc = ready_queue[prio];
 
     return new_proc;
 }
