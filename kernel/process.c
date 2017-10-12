@@ -14,6 +14,7 @@ PORT create_process (void (*ptr_to_new_proc) (PROCESS, PARAM),
 	assert(prio >= 0 && prio <= MAX_READY_QUEUES);
 	PROCESS new_proc;
 	MEM_ADDR esp;
+	PORT p;
 
 	new_proc = next_free_pcb;
 	next_free_pcb = next_free_pcb->next;
@@ -25,6 +26,9 @@ PORT create_process (void (*ptr_to_new_proc) (PROCESS, PARAM),
 	new_proc->priority		= prio;
 	new_proc->first_port	= NULL;
 	new_proc->name			= name;
+	/* new_proc gets first_port */
+	create_new_port(new_proc);
+
 
 	/* Computes starting address of process' stack frame */
 	esp = 640 * 1024 - (new_proc - pcb) * 16 * 1024;
@@ -58,7 +62,7 @@ PORT create_process (void (*ptr_to_new_proc) (PROCESS, PARAM),
 
 	add_ready_queue(new_proc);
 
-	return NULL;
+	return new_proc->first_port;
 }
 
 
