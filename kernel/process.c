@@ -33,29 +33,23 @@ PORT create_process (void (*ptr_to_new_proc) (PROCESS, PARAM),
 	/* Computes starting address of process' stack frame */
 	esp = 640 * 1024 - (new_proc - pcb) * 16 * 1024;
 
-	/* Initialize stack frame */
-	esp -= 4;
-	poke_l(esp, param);				/* PARAM */
-	esp -= 4;
-	poke_l(esp, new_proc);			/* self */
-	esp -= 4;
-	poke_l(esp, 0);					/* dummy return address*/
-	esp -= 4;
-	poke_l(esp, ptr_to_new_proc);	/* EIP */
-	esp -= 4;
-	poke_l(esp, 0);					/* EAX */
-	esp -= 4;
-	poke_l(esp, 0);					/* ECX */
-	esp -= 4;
-	poke_l(esp, 0);					/* EDX */
-	esp -= 4;
-	poke_l(esp, 0);					/* EBX */
-	esp -= 4;
-	poke_l(esp, 0);					/* EBP */
-	esp -= 4;
-	poke_l(esp, 0);					/* ESI */
-	esp -= 4;
-	poke_l(esp, 0);					/* EDI */
+#define PUSH(x)    esp -= 4; \
+                   poke_l (esp, (LONG) x);
+
+    /* Initialize the stack for the new process */
+    PUSH (param);		/* First data */
+    PUSH (new_proc);		/* Self */
+    PUSH (0);			/* dummy return address */
+    PUSH (ptr_to_new_proc);	/* EIP */
+    PUSH (0);			/* EAX */
+    PUSH (0);			/* ECX */
+    PUSH (0);			/* EDX */
+    PUSH (0);			/* EBX */
+    PUSH (0);			/* EBP */
+    PUSH (0);			/* ESI */
+    PUSH (0);			/* EDI */
+
+#undef PUSH
 
 	/* Save process stack pointer */
 	new_proc->esp = esp;
