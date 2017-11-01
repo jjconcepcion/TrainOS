@@ -12,7 +12,11 @@ PROCESS active_proc;
  */
 PCB *ready_queue [MAX_READY_QUEUES];
 
-
+/*
+ * The bits in ready_procs tell which ready queue is empty.
+ * The MSB of ready_procs corresponds to ready_queue[7].
+ */
+unsigned ready_procs;
 
 /*
  * add_ready_queue
@@ -27,15 +31,18 @@ void add_ready_queue (PROCESS proc)
     assert(proc->magic == MAGIC_PCB);
     assert(proc->priority >= 0
         && proc->priority < MAX_READY_QUEUES);
+    int prio;
     PROCESS queue_head, queue_tail;
 
-    queue_head = ready_queue[proc->priority];
+    prio = proc->priority;
+    queue_head = ready_queue[prio];
     if (queue_head == NULL) {
-    /* insert into empty queue */
-        ready_queue[proc->priority] = proc;
+	/* The only process on this priority level */
+        ready_queue[prio] = proc;
         proc->prev = proc->next = proc;
+    	ready_procs |= 1 << prio;
     } else {
-    /* insert into tail of queue */
+	/* Some other processes on this priority level */
         queue_tail = queue_head->prev;
         queue_tail->next = proc;
         proc->prev = queue_tail;
@@ -60,30 +67,18 @@ void remove_ready_queue (PROCESS proc)
     assert(proc->magic == MAGIC_PCB);
     assert(proc->priority >= 0
         && proc->priority < MAX_READY_QUEUES);
-    PROCESS queue_head,
-            queue_tail,
-            queue_new_head;
+    int prio;
 
-    queue_head = ready_queue[proc->priority];
-    if (proc == queue_head) {
-        if (proc == queue_head->next) {
-        /* remove solitary process */
-            ready_queue[proc->priority] = NULL;
-        } else {
-            queue_new_head = queue_head->next;
-            queue_tail = queue_head->prev;
-            queue_new_head->prev = queue_tail;
-            queue_tail->next = queue_new_head;
-            ready_queue[proc->priority] = queue_new_head;
-        }
+    prio = proc->priority;
+    if (proc == proc->next) {
+        /* remove solitar   y process */
+        ready_queue[prio] = NULL;
+    	ready_procs &= ~(1 << prio);
     } else {
-    /* removal of process not at head of queue */
-        proc->prev->next = proc->next;
-        proc->next->prev = proc->prev;
+    	ready_queue [prio] = proc->next;
+    	proc->next->prev   = proc->prev;
+    	proc->prev->next   = proc->next;
     }
-
-    /* unset dangling links */
-    proc->prev = proc->next = NULL;
 }
 
 
@@ -98,19 +93,18 @@ void remove_ready_queue (PROCESS proc)
 
 PROCESS dispatcher()
 {
-    PROCESS new_proc;
-    int p, prio;
+    PROCESS      new_proc;
+    unsigned     i;
 
-    for (p = 0; p < MAX_READY_QUEUES; p++) {
-        if (ready_queue[p] != NULL)
-            prio = p;
-    }
-
-    if (prio == active_proc->priority)
-        new_proc = active_proc->next;
+    /* Find queue with highest priority that is not empty */
+    i = table[ready_procs];
+    assert (i != -1);
+    if (i == active_proc->priority)
+	/* Round robin within the same priority level */
+	new_proc = active_proc->next;
     else
-        new_proc = ready_queue[prio];
-
+	/* Dispatch a process at a different priority level */
+	new_proc = ready_queue [i];
     return new_proc;
 }
 
@@ -167,6 +161,7 @@ void init_dispatcher()
         ready_queue[i] = NULL;
     }
 
+    ready_procs = 0;
     /* Add first process */
     add_ready_queue(active_proc);
 }
