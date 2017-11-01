@@ -128,7 +128,7 @@ void* receive (PROCESS* sender)
         if (port->open && port->blocked_list_head != NULL) {
             send_proc = port->blocked_list_head;
             /* dequeue process found on send block list */
-            port->blocked_list_head = port->blocked_list_head->next;
+            port->blocked_list_head = port->blocked_list_head->next_blocked;
             if (port->blocked_list_head == NULL)
                 port->blocked_list_tail = NULL;
             break;
