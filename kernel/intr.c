@@ -25,6 +25,149 @@ void load_idt (IDT* base)
 
 void init_idt_entry (int intr_no, void (*isr) (void))
 {
+    idt[intr_no].offset_0_15    = (unsigned) isr & 0xFFFF;
+    idt[intr_no].selector       = CODE_SELECTOR;
+    idt[intr_no].dword_count    = 0;
+    idt[intr_no].unused         = 0;
+    idt[intr_no].type           = 0xE;
+    idt[intr_no].dt             = 0;
+    idt[intr_no].dpl            = 0;
+    idt[intr_no].p              = 1;
+    idt[intr_no].offset_16_31   = ((unsigned) isr >> 16) && 0xFFFF;
+}
+
+
+void fatal_isr(int n)
+{
+    WINDOW error_window = {0, 24, 80, 1, 0, 0, ' '};
+
+    wprintf (&error_window, "Fatal interrupt %d (%s)", n, active_proc->name);
+    assert(0);
+}
+
+
+void interrupt0 ()
+{
+    fatal_isr(0);
+}
+
+
+
+void interrupt1 ()
+{
+    fatal_isr(1);
+}
+
+
+
+void interrupt2 ()
+{
+    fatal_isr(2);
+}
+
+
+void interrupt3 ()
+{
+    fatal_isr(3);
+}
+
+
+void interrupt4 ()
+{
+    fatal_isr(4);
+}
+
+
+void interrupt5 ()
+{
+    fatal_isr(5);
+}
+
+
+void interrupt6 ()
+{
+    fatal_isr(6);
+}
+
+
+void interrupt7 ()
+{
+    fatal_isr(7);
+}
+
+
+void interrupt8 ()
+{
+    fatal_isr(8);
+}
+
+
+void interrupt9 ()
+{
+    fatal_isr(9);
+}
+
+
+void interrupt10 ()
+{
+    fatal_isr(10);
+}
+
+
+void interrupt11 ()
+{
+    fatal_isr(11);
+}
+
+
+
+void interrupt12 ()
+{
+    fatal_isr(12);
+}
+
+
+void interrupt13 ()
+{
+    fatal_isr(13);
+}
+
+
+void interrupt14 ()
+{
+    fatal_isr(14);
+}
+
+
+
+void interrupt15 ()
+{
+    fatal_isr(15);
+}
+
+
+void interrupt16 ()
+{
+    fatal_isr(16);
+}
+
+
+void isr();
+void dummy_isr ()
+{
+    asm ("isr:");
+    asm ("push %eax; push %ecx; push %edx");
+    asm ("push %ebx; push %ebp; push %esi; push %edi");
+
+    /* react to the interrupt */
+
+    /* reset interrupt controller */
+    asm ("movb $0x20,%al");
+    asm ("outb %al,$0x20");
+    
+    asm ("pop %edi; pop %esi; pop %ebp; pop %ebx");
+    asm ("pop %edx; pop %ecx; pop %eax");
+    asm ("iret");
 }
 
 
@@ -156,4 +299,35 @@ void re_program_interrupt_controller ()
 
 void init_interrupts()
 {
+    int i;
+
+    assert(sizeof (IDT) == IDT_ENTRY_SIZE);
+
+    load_idt(idt);
+
+    for (i = 0; i < MAX_INTERRUPTS; i++)
+    	init_idt_entry(i, dummy_isr);
+
+    init_idt_entry(0, interrupt0);
+    init_idt_entry(1, interrupt1);
+    init_idt_entry(2, interrupt2);
+    init_idt_entry(3, interrupt3);
+    init_idt_entry(4, interrupt4);
+    init_idt_entry(5, interrupt5);
+    init_idt_entry(6, interrupt6);
+    init_idt_entry(7, interrupt7);
+    init_idt_entry(8, interrupt8);
+    init_idt_entry(9, interrupt9);
+    init_idt_entry(10, interrupt10);
+    init_idt_entry(11, interrupt11);
+    init_idt_entry(12, interrupt12);
+    init_idt_entry(13, interrupt13);
+    init_idt_entry(14, interrupt14);
+    init_idt_entry(15, interrupt15);
+    init_idt_entry(16, interrupt16);
+
+    re_program_interrupt_controller();
+
+    interrupts_initialized = TRUE;
+    asm ("sti");
 }
