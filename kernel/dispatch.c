@@ -27,6 +27,8 @@ unsigned ready_procs;
 
 void add_ready_queue (PROCESS proc)
 {
+    volatile int saved_if;
+    DISABLE_INTR(saved_if);
     assert(proc != NULL);
     assert(proc->magic == MAGIC_PCB);
     assert(proc->priority >= 0
@@ -50,6 +52,7 @@ void add_ready_queue (PROCESS proc)
         queue_head->prev = proc;
     }
     proc->state = STATE_READY;
+    ENABLE_INTR(saved_if);
 }
 
 
@@ -63,6 +66,8 @@ void add_ready_queue (PROCESS proc)
 
 void remove_ready_queue (PROCESS proc)
 {
+    volatile int saved_if;
+    DISABLE_INTR(saved_if);
     assert(proc != NULL);
     assert(proc->magic == MAGIC_PCB);
     assert(proc->priority >= 0
@@ -79,6 +84,7 @@ void remove_ready_queue (PROCESS proc)
     	proc->next->prev   = proc->prev;
     	proc->prev->next   = proc->next;
     }
+    ENABLE_INTR(saved_if);
 }
 
 
