@@ -10,14 +10,17 @@ PORT create_process (void (*ptr_to_new_proc) (PROCESS, PARAM),
 		     PARAM param,
 		     char *name)
 {
-	assert(next_free_pcb != NULL);
-	assert(prio >= 0 && prio <= MAX_READY_QUEUES);
 	PROCESS new_proc;
 	MEM_ADDR esp;
 	PORT p;
 
+	volatile int saved_if;
+	DISABLE_INTR(saved_if);
+	assert(next_free_pcb != NULL);
+	assert(prio >= 0 && prio <= MAX_READY_QUEUES);
 	new_proc = next_free_pcb;
 	next_free_pcb = next_free_pcb->next;
+	ENABLE_INTR(saved_if);
 
 	/* Initiliaze PCB entry */
 	new_proc->magic 		= MAGIC_PCB;
