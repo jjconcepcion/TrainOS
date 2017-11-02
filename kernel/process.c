@@ -40,6 +40,12 @@ PORT create_process (void (*ptr_to_new_proc) (PROCESS, PARAM),
     PUSH (param);		/* First data */
     PUSH (new_proc);		/* Self */
     PUSH (0);			/* dummy return address */
+	if (interrupts_initialized) {
+		PUSH (0x200);	/* EFLAGS with interrupts enabled */
+	} else {
+		PUSH (0);		/* EFLAGS with interrupts disabled */
+	}
+	PUSH (CODE_SELECTOR);	/* CS */
     PUSH (ptr_to_new_proc);	/* EIP */
     PUSH (0);			/* EAX */
     PUSH (0);			/* ECX */

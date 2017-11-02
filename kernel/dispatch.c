@@ -120,6 +120,12 @@ PROCESS dispatcher()
  */
 void resign()
 {
+    asm("pushfl");
+    asm("cli");
+    asm("popl %eax");       /* EAX = EFLAGS */
+    asm("xchgl (%esp), %eax"); /* swap return addr with EFLAGS */
+    asm("pushl %cs");       /* push CS*/
+    asm("pushl %eax");      /* push return addr */
     /* Save context of current process */
     asm("pushl %eax");
     asm("pushl %ecx");
@@ -143,7 +149,7 @@ void resign()
     asm("popl %ecx");
     asm("popl %eax");
     /*return to new process  */
-    asm("ret");
+    asm("iret");
 }
 
 
