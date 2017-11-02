@@ -164,7 +164,7 @@ void dummy_isr ()
     /* reset interrupt controller */
     asm ("movb $0x20,%al");
     asm ("outb %al,$0x20");
-    
+
     asm ("pop %edi; pop %esi; pop %ebp; pop %ebx");
     asm ("pop %edx; pop %ecx; pop %eax");
     asm ("iret");
@@ -179,10 +179,46 @@ void dummy_isr ()
 void isr_timer ();
 void isr_timer_wrapper()
 {
+    /*
+     *	PUSHL	%EAX		; Save process' context
+     *  PUSHL   %ECX
+     *  PUSHL   %EDX
+     *  PUSHL   %EBX
+     *  PUSHL   %EBP
+     *  PUSHL   %ESI
+     *  PUSHL   %EDI
+     */
+    asm ("isr_timer:");
+    asm ("pushl %eax;pushl %ecx;pushl %edx");
+    asm ("pushl %ebx;pushl %ebp;pushl %esi;pushl %edi");
+    /* Save the context pointer ESP to the PCB */
+    asm ("movl %%esp,%0" : "=m" (active_proc->esp) : );
+    /* Call the actual implementation of the ISR */
+    asm ("call isr_timer_impl");
+    /* Restore context pointer ESP */
+    asm ("movl %0,%%esp" : : "m" (active_proc->esp) );
+    /*
+     *	MOVB  $0x20,%AL	; Reset interrupt controller
+     *	OUTB  %AL,$0x20
+     *	POPL  %EDI      ; Restore previously saved context
+     *  POPL  %ESI
+     *  POPL  %EBP
+     *  POPL  %EBX
+     *  POPL  %EDX
+     *  POPL  %ECX
+     *  POPL  %EAX
+     *	IRET		; Return to new process
+     */
+    asm ("movb $0x20,%al;outb %al,$0x20");
+    asm ("popl %edi;popl %esi;popl %ebp;popl %ebx");
+    asm ("popl %edx;popl %ecx;popl %eax");
+    asm ("iret");
 }
 
 void isr_timer_impl ()
 {
+    /* Dispatch new process */
+    active_proc = dispatcher();
 }
 
 
