@@ -361,6 +361,7 @@ void init_interrupts()
     init_idt_entry(14, interrupt14);
     init_idt_entry(15, interrupt15);
     init_idt_entry(16, interrupt16);
+    init_idt_entry (TIMER_IRQ, isr_timer);
 
     re_program_interrupt_controller();
 
