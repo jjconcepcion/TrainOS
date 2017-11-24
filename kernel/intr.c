@@ -1,4 +1,3 @@
-
 #include <kernel.h>
 
 BOOL interrupts_initialized = FALSE;
@@ -217,6 +216,13 @@ void isr_timer_wrapper()
 
 void isr_timer_impl ()
 {
+    PROCESS p;
+
+    /* Add waiting process back on the ready queu */
+    p = interrupt_table[TIMER_IRQ];
+    if (p && p->state == STATE_INTR_BLOCKED)
+        add_ready_queue(p);
+
     /* Dispatch new process */
     active_proc = dispatcher();
 }
@@ -298,6 +304,17 @@ void isr_keyb_impl()
 
 void wait_for_interrupt (int intr_no)
 {
+    volatile int saved_if;
+
+    DISABLE_INTR (saved_if);
+    if (interrupt_table[intr_no] != NULL)
+        panic ("wait_for_interrupt(): ISR busy");
+    interrupt_table[intr_no] = active_proc;
+    remove_ready_queue(active_proc);
+    active_proc->state = STATE_INTR_BLOCKED;
+    resign();
+    interrupt_table[intr_no] = NULL;
+    ENABLE_INTR (saved_if);
 }
 
 
