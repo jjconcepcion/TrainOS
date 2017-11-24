@@ -17,6 +17,9 @@ WORD peek_screen(int x, int y) {
 
 void scroll_window(WINDOW* wnd) {
 	int x, y, wx, wy;
+	volatile int saved_if;
+
+	DISABLE_INTR(saved_if);
 	/* shift entire window contents up one line */
 	for (y = 1; y < wnd->height; y++) {
 		wy = wnd->y + y;
@@ -34,6 +37,7 @@ void scroll_window(WINDOW* wnd) {
 	}
 	wnd->cursor_x = 0;
 	wnd->cursor_y = wnd->height - 1;
+	ENABLE_INTR(saved_if);
 }
 
 void move_cursor(WINDOW* wnd, int x, int y)
@@ -63,6 +67,9 @@ void show_cursor(WINDOW* wnd)
 void clear_window(WINDOW* wnd)
 {
 	int x, y, wx, wy;
+	volatile int saved_if;
+
+	DISABLE_INTR(saved_if);
 	/* erase window contents */
 	for (y = 0; y < wnd->height; y++) {
 		wy = y + wnd->y;
@@ -75,11 +82,15 @@ void clear_window(WINDOW* wnd)
 	wnd->cursor_x = 0;
 	wnd->cursor_y = 0;
 	show_cursor(wnd);
+	ENABLE_INTR(saved_if);
 }
 
 
 void output_char(WINDOW* wnd, unsigned char c)
 {
+	volatile int saved_if;
+
+	DISABLE_INTR(saved_if);
 	remove_cursor(wnd);
 	switch (c) {
 		case '\n':
@@ -111,6 +122,7 @@ void output_char(WINDOW* wnd, unsigned char c)
 	if (wnd->cursor_y == wnd->height)
 		scroll_window(wnd);
 	show_cursor(wnd);
+	ENABLE_INTR(saved_if);
 }
 
 
