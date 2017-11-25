@@ -380,8 +380,11 @@ void init_interrupts()
     init_idt_entry(16, interrupt16);
     init_idt_entry (TIMER_IRQ, isr_timer);
     init_idt_entry (KEYB_IRQ, isr_keyb);
-    
+
     re_program_interrupt_controller();
+
+    for (i = 0; i < MAX_INTERRUPTS; i++)
+        interrupt_table[i] = NULL;
 
     interrupts_initialized = TRUE;
     asm ("sti");
