@@ -208,6 +208,14 @@ char* execute_cmd(char *cmd_buffer, int window_id, CMD_HIST_ENTRY *cmd_history)
     return cmd;
 }
 
+void update_cmd_history(char *cmd, CMD_HIST_ENTRY *cmd_history, int cmd_no)
+{
+    int i;
+
+    i = CMD_HIST_INDEX(cmd_no);
+    cmd_history[i].cmd = cmd;
+    cmd_history[i].no = cmd_no;
+}
 
 void shell_process(PROCESS self, PARAM param)
 {
@@ -239,8 +247,7 @@ void shell_process(PROCESS self, PARAM param)
                 /* Skip emty lines */
                 if (bytes_read > 0) {
                     cmd = execute_cmd(cmd_buffer, window_id, cmd_history);
-                    cmd_history[CMD_HIST_INDEX(cmd_no)].cmd = cmd;
-                    cmd_history[CMD_HIST_INDEX(cmd_no)].no = cmd_no;
+                    update_cmd_history(cmd, cmd_history, cmd_no);
                     cmd_no++;
                     cmd_buffer = malloc(CMD_BUF_SIZE);
                     ch = cmd_buffer;
