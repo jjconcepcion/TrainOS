@@ -147,6 +147,36 @@ char* repeat_cmd(int window_id, int cmd_no, CMD_HIST_ENTRY *cmd_history)
 }
 
 
+void print_ps_output(int window_id)
+{
+	static const char *state[] = {
+		"READY          ",
+		"SEND_BLOCKED   ",
+		"REPLY_BLOCKED  ",
+		"RECEIVE_BLOCKED",
+		"MESSAGE_BLOCKED",
+		"INTR_BLOCKED   "
+	};
+	int i;
+    PROCESS p;
+
+	wm_print(window_id, "\nState           Active Prio Name\n");
+	wm_print(window_id, "---------------------------------------\n");
+	for (i = 0; i < MAX_PROCS; i++) {
+        /* print process details */
+		if (pcb[i].used == TRUE) {
+            p = &pcb[i];
+        	wm_print(window_id, "%s", state[p->state]);
+        	if (p == active_proc)
+        		wm_print(window_id, " *       ");
+        	else
+        		wm_print(window_id, "         ");
+            wm_print(window_id, "%c %s\n", p->priority + 48, p->name);
+        }
+	}
+}
+
+
 char* execute_cmd(char *cmd_buffer, int window_id, CMD_HIST_ENTRY *cmd_history)
 {
     char *cmd;
@@ -162,6 +192,7 @@ char* execute_cmd(char *cmd_buffer, int window_id, CMD_HIST_ENTRY *cmd_history)
     } else if (str_match(cmd, "pong")) {
         start_pong();
     } else if (str_match(cmd, "ps")) {
+        print_ps_output(window_id);
     } else if (str_match(cmd, "history")) {
         print_history(window_id, cmd_history);
     } else if (*cmd == '!') {
