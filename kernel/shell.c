@@ -15,6 +15,7 @@ typedef struct _CMD_HIST_ENTRY {
 
 
 void shell_process(PROCESS self, PARAM param);
+char* execute_cmd(char *cmd_buffer, int window_id, CMD_HIST_ENTRY *cmd_history);
 
 
 void print_shell_heading(int window_id)
@@ -119,6 +120,33 @@ char* parse_cmd(char *buf)
     return cmd;
 }
 
+
+void print_history(int window_id, CMD_HIST_ENTRY *cmd_history)
+{
+    int i = 0;
+    while (cmd_history[i].cmd != NULL && i < CMD_HIST_SIZE){
+        wm_print(window_id, "\n   %d  %s", cmd_history[i].no
+                                        , cmd_history[i].cmd);
+        i++;
+    }
+}
+
+
+char* repeat_cmd(int window_id, int cmd_no, CMD_HIST_ENTRY *cmd_history)
+{
+    char *old_cmd;
+
+    old_cmd = NULL;
+    old_cmd = cmd_history[CMD_HIST_INDEX(cmd_no)].cmd;
+    if (old_cmd != NULL)
+        old_cmd = execute_cmd(old_cmd, window_id, cmd_history);
+    else
+        wm_print(window_id, "\n!%d: event not found", cmd_no);
+
+    return old_cmd;
+}
+
+
 char* execute_cmd(char *cmd_buffer, int window_id, CMD_HIST_ENTRY *cmd_history)
 {
     char *cmd;
@@ -135,13 +163,10 @@ char* execute_cmd(char *cmd_buffer, int window_id, CMD_HIST_ENTRY *cmd_history)
         start_pong();
     } else if (str_match(cmd, "ps")) {
     } else if (str_match(cmd, "history")) {
-        int i = 0;
-        while (cmd_history[i].cmd != NULL && i < CMD_HIST_SIZE){
-            wm_print(window_id, "\n   %d  %s", cmd_history[i].no
-                                            , cmd_history[i].cmd);
-            i++;
-        }
+        print_history(window_id, cmd_history);
     } else if (*cmd == '!') {
+        int cmd_no = atoi((cmd+1));
+        cmd = repeat_cmd(window_id, cmd_no, cmd_history);
     } else if (str_match(cmd, "about")) {
         print_about(window_id);
     } else {
