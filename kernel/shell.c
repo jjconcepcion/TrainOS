@@ -41,6 +41,7 @@ void print_help(int window_id)
         "ps   --print process table\n"
         "history   --print command history\n";
     static const char *help3 =
+        "train    --model train controller\n"
         "!<num>   --repeat command from history with given num\n"
         "about    --print about message";
 
@@ -195,6 +196,8 @@ char* execute_cmd(char *cmd_buffer, int window_id, CMD_HIST_ENTRY *cmd_history)
         print_ps_output(window_id);
     } else if (str_match(cmd, "history")) {
         print_history(window_id, cmd_history);
+    } else if (str_match(cmd, "train")) {
+        start_train_app();
     } else if (*cmd == '!') {
         int cmd_no = atoi((cmd+1));
         cmd = repeat_cmd(window_id, cmd_no, cmd_history);
