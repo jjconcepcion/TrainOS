@@ -1,7 +1,7 @@
 
 #include <kernel.h>
 
-#define TRAIN_ID 20
+#define TRAIN_ID "20\0"
 #define CMD_DELAY_TIME 15
 #define BUFFER_SIZE 8
 #define CMD_TERMINATOR '\015'
@@ -32,6 +32,26 @@ void set_switch(char *id, char *setting)
     strcat(cmd, "M\0");
     strcat(cmd, id);
     strcat(cmd, setting);
+    cmd[k_strlen(cmd)] = CMD_TERMINATOR;
+
+    msg.output_buffer = cmd;
+    msg.len_input_buffer = 0;
+
+    sleep(CMD_DELAY_TIME);
+    send(com_port, &msg);
+}
+
+
+void set_train_speed(char *speed)
+{
+    char cmd[BUFFER_SIZE];
+    COM_Message msg;
+
+    cmd[0] = '\0';
+    strcat(cmd, "L\0");
+    strcat(cmd, TRAIN_ID);
+    strcat(cmd, "S\0");
+    strcat(cmd, speed);
     cmd[k_strlen(cmd)] = CMD_TERMINATOR;
 
     msg.output_buffer = cmd;
