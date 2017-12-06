@@ -5,6 +5,8 @@
 #define CMD_DELAY_TIME 15
 #define BUFFER_SIZE 8
 #define CMD_TERMINATOR '\015'
+#define OCCUPIED 1
+#define UNOCCUPIED 0
 
 
 void strcat(char *dest, char *src)
@@ -21,6 +23,7 @@ void strcat(char *dest, char *src)
     }
     dest[i] = '\0';
 }
+
 
 void send_train_command(char *cmd, char *response, int response_len)
 {
@@ -39,8 +42,8 @@ void set_switch(char *id, char *setting)
 {
     char cmd[BUFFER_SIZE];
 
-    cmd[0] = '\0';
-    strcat(cmd, "M\0");
+    cmd[0] = 'M';
+    cmd[1] = '\0';
     strcat(cmd, id);
     strcat(cmd, setting);
     cmd[k_strlen(cmd)] = CMD_TERMINATOR;
@@ -53,8 +56,8 @@ void set_train_speed(char *speed)
 {
     char cmd[BUFFER_SIZE];
 
-    cmd[0] = '\0';
-    strcat(cmd, "L\0");
+    cmd[0] = 'L';
+    cmd[1] = '\0';
     strcat(cmd, TRAIN_ID);
     strcat(cmd, "S\0");
     strcat(cmd, speed);
@@ -62,6 +65,53 @@ void set_train_speed(char *speed)
 
     send_train_command(cmd, 0, 0);
 }
+
+
+void change_direction(char *train_id)
+{
+    char cmd[BUFFER_SIZE];
+
+    cmd[0] = 'L';
+    cmd[1] = '\0';
+    strcat(cmd, TRAIN_ID);
+    strcat(cmd, "D\0");
+    cmd[k_strlen(cmd)] = CMD_TERMINATOR;
+
+    send_train_command(cmd, 0, 0);
+}
+
+
+void clear_s88_buffer()
+{
+    char cmd[BUFFER_SIZE];
+
+    cmd[0] = 'R';
+    cmd[1] = CMD_TERMINATOR;
+
+    send_train_command(cmd, 0, 0);
+}
+
+int status_of_contact(char *id)
+{
+    static const int len = 3;
+    int status;
+    char cmd[BUFFER_SIZE];
+    char response[len];
+
+    cmd[0] = 'C';
+    cmd[1] = '\0';
+    strcat(cmd, id);
+    cmd[k_strlen(cmd)] = CMD_TERMINATOR;
+
+    /* must clear buffer before every inquiry */
+    clear_s88_buffer();
+    send_train_command(cmd, response, len);
+
+    status = (response[0] == '*' && response[1] == '1') ? OCCUPIED : UNOCCUPIED;
+
+    return status;
+}
+
 
 void set_outer_loop_switches()
 {
@@ -93,6 +143,7 @@ void init_train()
     /* Ensure rogue train doesn't run of track */
     set_outer_loop_switches();
 }
+
 
 void start_train_app()
 {
