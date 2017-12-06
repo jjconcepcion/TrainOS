@@ -277,7 +277,6 @@ void start_shell();
 
 /*=====>>> train.c <<<===================================================*/
 
-void start_train_app();
 void init_train();
 void set_train_speed(char* speed);
 

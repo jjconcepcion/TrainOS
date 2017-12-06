@@ -127,11 +127,11 @@ void train_process(PROCESS self, PARAM param)
 {
     int window_id;
 
-
     window_id = wm_create(5, 5, 40, 15);
     wm_print(window_id, "TOS Train Application\n");
 
-    init_train();
+    /* Ensure rogue train doesn't run of track */
+    set_outer_loop_switches();
 
     while(1) {
     }
@@ -140,13 +140,6 @@ void train_process(PROCESS self, PARAM param)
 
 void init_train()
 {
-    /* Ensure rogue train doesn't run of track */
-    set_outer_loop_switches();
-}
-
-
-void start_train_app()
-{
     create_process(train_process, 5, 0, "Train process");
-    resign();
+    resign();   
 }

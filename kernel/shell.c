@@ -197,7 +197,7 @@ char* execute_cmd(char *cmd_buffer, int window_id, CMD_HIST_ENTRY *cmd_history)
     } else if (str_match(cmd, "history")) {
         print_history(window_id, cmd_history);
     } else if (str_match(cmd, "train")) {
-        start_train_app();
+        init_train();
     } else if (*cmd == '!') {
         int cmd_no = atoi((cmd+1));
         cmd = repeat_cmd(window_id, cmd_no, cmd_history);
