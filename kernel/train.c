@@ -42,6 +42,7 @@ void set_switch(char *id, char *setting)
 {
     char cmd[BUFFER_SIZE];
 
+    k_memset(cmd, 0, BUFFER_SIZE);
     cmd[0] = 'M';
     cmd[1] = '\0';
     strcat(cmd, id);
@@ -56,6 +57,7 @@ void set_train_speed(char *speed)
 {
     char cmd[BUFFER_SIZE];
 
+    k_memset(cmd, 0, BUFFER_SIZE);
     cmd[0] = 'L';
     cmd[1] = '\0';
     strcat(cmd, TRAIN_ID);
@@ -71,6 +73,7 @@ void change_direction(char *train_id)
 {
     char cmd[BUFFER_SIZE];
 
+    k_memset(cmd, 0, BUFFER_SIZE);
     cmd[0] = 'L';
     cmd[1] = '\0';
     strcat(cmd, TRAIN_ID);
@@ -85,6 +88,7 @@ void clear_s88_buffer()
 {
     char cmd[BUFFER_SIZE];
 
+    k_memset(cmd, 0, BUFFER_SIZE);
     cmd[0] = 'R';
     cmd[1] = CMD_TERMINATOR;
 
@@ -98,6 +102,7 @@ int status_of_contact(char *id)
     char cmd[BUFFER_SIZE];
     char response[len];
 
+    k_memset(cmd, 0, BUFFER_SIZE);
     cmd[0] = 'C';
     cmd[1] = '\0';
     strcat(cmd, id);
@@ -141,5 +146,4 @@ void train_process(PROCESS self, PARAM param)
 void init_train()
 {
     create_process(train_process, 5, 0, "Train process");
-    resign();   
 }
