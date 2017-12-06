@@ -22,11 +22,22 @@ void strcat(char *dest, char *src)
     dest[i] = '\0';
 }
 
+void send_train_command(char *cmd, char *response, int response_len)
+{
+    COM_Message msg;
+
+    msg.output_buffer = cmd;
+    msg.input_buffer = response;
+    msg.len_input_buffer = response_len;
+
+    sleep(CMD_DELAY_TIME);
+    send(com_port, &msg);
+}
+
 
 void set_switch(char *id, char *setting)
 {
     char cmd[BUFFER_SIZE];
-    COM_Message msg;
 
     cmd[0] = '\0';
     strcat(cmd, "M\0");
@@ -34,18 +45,13 @@ void set_switch(char *id, char *setting)
     strcat(cmd, setting);
     cmd[k_strlen(cmd)] = CMD_TERMINATOR;
 
-    msg.output_buffer = cmd;
-    msg.len_input_buffer = 0;
-
-    sleep(CMD_DELAY_TIME);
-    send(com_port, &msg);
+    send_train_command(cmd, 0, 0);
 }
 
 
 void set_train_speed(char *speed)
 {
     char cmd[BUFFER_SIZE];
-    COM_Message msg;
 
     cmd[0] = '\0';
     strcat(cmd, "L\0");
@@ -54,11 +60,7 @@ void set_train_speed(char *speed)
     strcat(cmd, speed);
     cmd[k_strlen(cmd)] = CMD_TERMINATOR;
 
-    msg.output_buffer = cmd;
-    msg.len_input_buffer = 0;
-
-    sleep(CMD_DELAY_TIME);
-    send(com_port, &msg);
+    send_train_command(cmd, 0, 0);
 }
 
 void set_outer_loop_switches()
