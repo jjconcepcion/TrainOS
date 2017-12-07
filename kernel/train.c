@@ -10,6 +10,7 @@
 #define ROGUE_SEARCH_DURATION 12
 #define ROGUE_SEARCH_LOCATION "7\0"
 #define NUM_TRAIN_START_POSITIONS 4
+#define TRAIN_LOG_FLAG 1
 
 typedef enum _train_configuration {
     UNKNOWN, CONFIG1_NO_ROGUE, CONFIG2_NO_ROGUE, CONFIG3_NO_ROGUE,
@@ -26,6 +27,18 @@ void config1_rogue_route_plan();
 void config2_rogue_route_plan();
 void config3_rogue_route_plan();
 void config4_rogue_route_plan();
+
+
+static int *TRAIN_LOG_WINDOW_ID = NULL;
+
+/*
+ * Helper function for printing out train app messages
+ */
+void train_log(char *msg)
+{
+    if (TRAIN_LOG_FLAG)
+        wm_print(*TRAIN_LOG_WINDOW_ID, "%s", msg);
+}
 
 
 void strcat(char *dest, char *src)
@@ -77,6 +90,12 @@ void set_switch(char *id, char *setting)
     cmd[k_strlen(cmd)] = CMD_TERMINATOR;
 
     send_train_command(cmd, 0, 0);
+
+    train_log("\nSet switch: ");
+    train_log(id);
+    train_log(": ");
+    train_log(setting);
+    train_log("\n");
 }
 
 
@@ -98,6 +117,10 @@ void set_train_speed(char *speed)
     cmd[k_strlen(cmd)] = CMD_TERMINATOR;
 
     send_train_command(cmd, 0, 0);
+
+    train_log("\nSet train speed: ");
+    train_log(speed);
+    train_log("\n");
 }
 
 
@@ -117,6 +140,7 @@ void change_direction()
     strcat(cmd, "D\0");
     cmd[k_strlen(cmd)] = CMD_TERMINATOR;
 
+    train_log("\nChange train direction.\n");
     send_train_command(cmd, 0, 0);
 }
 
@@ -133,6 +157,7 @@ void clear_s88_buffer()
     cmd[0] = 'R';
     cmd[1] = CMD_TERMINATOR;
 
+    train_log("\nClear s88 buffer.\n");
     send_train_command(cmd, 0, 0);
 }
 
@@ -159,9 +184,16 @@ int status_of_contact(char *id)
 
     /* must clear buffer before every inquiry */
     clear_s88_buffer();
+
+    train_log("\nProbe contact: ");
+    train_log(id);
+
     send_train_command(cmd, response, len);
 
     status = (response[0] == '*' && response[1] == '1') ? OCCUPIED : UNOCCUPIED;
+
+    if (status) train_log(": OCCUPIED\n");
+        else  train_log(": UNOCCUPIED\n");
 
     return status;
 }
@@ -173,6 +205,7 @@ int status_of_contact(char *id)
  */
 void set_outer_loop_switches()
 {
+    train_log("\nSetting switches for outer loop...\n");
     set_switch("5\0", "G\0");
     set_switch("8\0", "G\0");
     set_switch("9\0", "R\0");
@@ -201,6 +234,10 @@ int detect_rogue_train()
         duration--;
     }
 
+    train_log("\nRogue train: ");
+    if (!detected) train_log(" NOT ");
+    train_log("DETECTED\n");
+
     return detected;
 }
 
@@ -210,6 +247,8 @@ int detect_rogue_train()
  */
 void identify(TRAIN_CONFIGURATION *scenario)
 {
+    train_log("\nIndetifying train configuration...\n");
+
     int config[NUM_TRAIN_START_POSITIONS+1];
     int rogue_exists;
 
@@ -219,29 +258,39 @@ void identify(TRAIN_CONFIGURATION *scenario)
     config[3] = status_of_contact("5\0");
     config[4] = status_of_contact("16\0");
 
+    train_log("Scenario: ");
     if (!rogue_exists) {
         if (config[1]) {
             *scenario = CONFIG1_NO_ROGUE;
+            train_log("Configuration 1\n");
         } else if (config[2]) {
             *scenario = CONFIG2_NO_ROGUE;
+            train_log("Configuration 2\n");
         } else if (config[3]) {
             *scenario = CONFIG3_NO_ROGUE;
+            train_log("Configuration 3\n");
         } else if (config[4]) {
             *scenario = CONFIG4_NO_ROGUE;
+            train_log("Configuration 4\n");
         } else {
             *scenario = UNKNOWN;
         }
     } else {
         if (config[1]) {
             *scenario = CONFIG1_ROGUE;
+            train_log("Configuration 1 with rogue train\n");
         } else if (config[2]) {
             *scenario = CONFIG2_ROGUE;
+            train_log("Configuration 2 with rogue train\n");
         } else if (config[3]) {
             *scenario = CONFIG3_ROGUE;
+            train_log("Configuration 3 with rogue train\n");
         } else if (config[4]) {
             *scenario = CONFIG4_ROGUE;
+            train_log("Configuration 4 with rogue train\n");
         } else {
             *scenario = UNKNOWN;
+            train_log("Unidentified\n");
         }
     }
 }
@@ -249,6 +298,7 @@ void identify(TRAIN_CONFIGURATION *scenario)
 
 void execute_route_for(TRAIN_CONFIGURATION scenario)
 {
+    train_log("\nExecuting train route...\n");
     switch (scenario) {
         case CONFIG1_NO_ROGUE:
             config1_route_plan();
@@ -281,6 +331,14 @@ void execute_route_for(TRAIN_CONFIGURATION scenario)
 
 }
 
+void print_app_heading(int window_id) {
+    wm_print(window_id, "**********************\n");
+    wm_print(window_id, "TOS Train Application\n");
+    wm_print(window_id, "**********************\n");
+    if (!TRAIN_LOG_FLAG)
+        wm_print(window_id, "\nLog messages disabled\n");
+}
+
 
 void train_process(PROCESS self, PARAM param)
 {
@@ -288,7 +346,9 @@ void train_process(PROCESS self, PARAM param)
     TRAIN_CONFIGURATION train_scenario;
 
     window_id = wm_create(5, 5, 40, 15);
-    wm_print(window_id, "TOS Train Application\n");
+    if (TRAIN_LOG_FLAG) TRAIN_LOG_WINDOW_ID = &window_id;
+
+    print_app_heading(window_id);
 
     /* Ensure rogue train if present doesn't run of track */
     set_outer_loop_switches();
@@ -311,8 +371,26 @@ void init_train()
  *
  */
 
+
+/*
+ * Scenario: train located on contact 8, wagon on contact 11, no rogue train
+ */
 void config1_route_plan()
 {
+    set_switch("4\0", "R\0");
+    set_switch("3\0", "G\0");
+    set_switch("8\0", "R\0");
+    set_switch("5\0", "R\0");
+    set_switch("6\0", "R\0");
+    set_train_speed("4\0");
+    while (status_of_contact("12\0") == UNOCCUPIED);
+    set_switch("8\0", "G\0");
+    while (status_of_contact("7\0") == UNOCCUPIED);
+    set_train_speed("0\0");
+    change_direction(TRAIN_ID);
+    set_train_speed("4\0");
+    while (status_of_contact("8\0") == UNOCCUPIED);
+    set_train_speed("0\0");
 }
 
 
