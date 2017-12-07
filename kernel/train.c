@@ -18,6 +18,16 @@ typedef enum _train_configuration {
 } TRAIN_CONFIGURATION;
 
 
+void config1_route_plan();
+void config2_route_plan();
+void config3_route_plan();
+void config4_route_plan();
+void config1_rogue_route_plan();
+void config2_rogue_route_plan();
+void config3_rogue_route_plan();
+void config4_rogue_route_plan();
+
+
 void strcat(char *dest, char *src)
 {
     int i, j;
@@ -237,6 +247,41 @@ void identify(TRAIN_CONFIGURATION *scenario)
 }
 
 
+void execute_route_for(TRAIN_CONFIGURATION scenario)
+{
+    switch (scenario) {
+        case CONFIG1_NO_ROGUE:
+            config1_route_plan();
+            break;
+        case CONFIG2_NO_ROGUE:
+            config2_route_plan();
+            break;
+        case CONFIG3_NO_ROGUE:
+            config3_route_plan();
+            break;
+        case CONFIG4_NO_ROGUE:
+            config4_route_plan();
+            break;
+        case CONFIG1_ROGUE:
+            config1_rogue_route_plan();
+            break;
+        case CONFIG2_ROGUE:
+            config2_rogue_route_plan();
+            break;
+        case CONFIG3_ROGUE:
+            config3_rogue_route_plan();
+            break;
+        case CONFIG4_ROGUE:
+            config4_rogue_route_plan();
+            break;
+        default:
+            break;
+    }
+
+
+}
+
+
 void train_process(PROCESS self, PARAM param)
 {
     int window_id;
@@ -248,6 +293,7 @@ void train_process(PROCESS self, PARAM param)
     /* Ensure rogue train if present doesn't run of track */
     set_outer_loop_switches();
     identify(&train_scenario);
+    execute_route_for(train_scenario);
 
     while(1);
 }
@@ -256,4 +302,50 @@ void train_process(PROCESS self, PARAM param)
 void init_train()
 {
     create_process(train_process, 5, 0, "Train process");
+}
+
+
+/*
+ *
+ * Train route strategy implementations
+ *
+ */
+
+void config1_route_plan()
+{
+}
+
+
+void config2_route_plan()
+{
+}
+
+
+void config3_route_plan()
+{
+}
+
+
+void config4_route_plan()
+{
+}
+
+
+void config1_rogue_route_plan()
+{
+}
+
+
+void config2_rogue_route_plan()
+{
+}
+
+
+void config3_rogue_route_plan()
+{
+}
+
+
+void config4_rogue_route_plan()
+{
 }
