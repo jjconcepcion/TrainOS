@@ -207,8 +207,8 @@ void set_outer_loop_switches()
 {
     train_log("\n>>Setting switches for outer loop...\n");
     set_switch("5\0", "G\0");
-    set_switch("8\0", "G\0");
     set_switch("9\0", "R\0");
+    set_switch("8\0", "G\0");
     set_switch("4\0", "G\0");
     set_switch("1\0", "G\0");
 }
@@ -494,16 +494,72 @@ void config1_rogue_route_plan()
 }
 
 
+/*
+ * Scenario: train located on contact 12, wagon on contact 2 with a rogue train
+ * present.
+ */
 void config2_rogue_route_plan()
 {
+    set_switch("8\0", "R\0");
+    set_switch("7\0", "G\0");
+    set_switch("4\0", "R\0");
+    set_switch("3\0", "G\0");
+    change_direction();
+    set_train_speed("5\0");
+    while (status_of_contact("7\0") == UNOCCUPIED);
+    set_train_speed("4\0");
+    while (status_of_contact("2\0") == OCCUPIED);
+    set_train_speed("0\0");
+    set_switch("8\0", "G\0");
+    set_switch("4\0", "G\0");
+    while (status_of_contact("10\0") == UNOCCUPIED);
+    set_train_speed("5\0");
+    set_switch("8\0", "R\0");
+    set_train_speed("4\0");
+    while (status_of_contact("11\0") == UNOCCUPIED);
+    set_switch("8\0", "G\0");
+    while (status_of_contact("12\0") == UNOCCUPIED);
+    set_train_speed("0\0");
 }
 
 
+/*
+ * Scenario: train located on contact 5, wagon on contact 2 with a rogue train
+ * present.
+ */
 void config3_rogue_route_plan()
 {
 }
 
 
+/*
+ * Scenario: train located on contact 16, wagon on contact 9 with a rogue train
+ * present.
+ */
 void config4_rogue_route_plan()
 {
+    set_switch("7\0", "G\0");
+    set_switch("9\0", "G\0");
+    while (status_of_contact("14\0") == UNOCCUPIED);
+    set_train_speed("4\0");
+    while (status_of_contact("10\0") == UNOCCUPIED);
+    set_switch("8\0", "R\0");
+    while (status_of_contact("12\0") == UNOCCUPIED);
+    set_train_speed("0\0");
+    change_direction();
+    set_train_speed("5\0");
+    while (status_of_contact("4\0") == UNOCCUPIED);
+    set_train_speed("4\0");
+    while (status_of_contact("3\0") == UNOCCUPIED);
+    set_train_speed("0\0");
+    while (status_of_contact("14\0") == UNOCCUPIED);
+    set_switch("8\0", "G\0");
+    set_train_speed("4\0");
+    while (status_of_contact("14\0") == UNOCCUPIED);
+    set_train_speed("0\0");
+    change_direction();
+    set_train_speed("4\0");
+    while (status_of_contact("16\0") == UNOCCUPIED);
+    set_train_speed("0\0");
+
 }
