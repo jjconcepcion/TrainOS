@@ -9,6 +9,13 @@
 #define UNOCCUPIED 0
 #define ROGUE_SEARCH_DURATION 12
 #define ROGUE_SEARCH_LOCATION "7\0"
+#define NUM_TRAIN_START_POSITIONS 4
+
+typedef enum _train_configuration {
+    UNKNOWN, CONFIG1_NO_ROGUE, CONFIG2_NO_ROGUE, CONFIG3_NO_ROGUE,
+    CONFIG4_NO_ROGUE, CONFIG1_ROGUE, CONFIG2_ROGUE, CONFIG3_ROGUE,
+    CONFIG4_ROGUE
+} TRAIN_CONFIGURATION;
 
 
 void strcat(char *dest, char *src)
@@ -42,6 +49,7 @@ void send_train_command(char *cmd, char *response, int response_len)
     send(com_port, &msg);
 }
 
+
 /*
  * Change setting of model train track switch.
  * command format: "M{id}{setting}\015"
@@ -60,6 +68,7 @@ void set_switch(char *id, char *setting)
 
     send_train_command(cmd, 0, 0);
 }
+
 
 /*
  * Change the speed of the model train which we control
@@ -80,6 +89,7 @@ void set_train_speed(char *speed)
 
     send_train_command(cmd, 0, 0);
 }
+
 
 /*
  * Change the direction of travel of the model train which we control
@@ -168,7 +178,8 @@ void set_outer_loop_switches()
  *
  * returns 1 if rogue train is present, otherwise 0.
  */
-int detect_rogue_train() {
+int detect_rogue_train()
+{
     char *monitoring = ROGUE_SEARCH_LOCATION;
     int duration, detected;
 
@@ -184,15 +195,59 @@ int detect_rogue_train() {
 }
 
 
+/*
+ * Returns the configuration of the model train via the scenario argument.
+ */
+void identify(TRAIN_CONFIGURATION *scenario)
+{
+    int config[NUM_TRAIN_START_POSITIONS+1];
+    int rogue_exists;
+
+    rogue_exists = detect_rogue_train();
+    config[1] = status_of_contact("8\0");
+    config[2] = status_of_contact("12\0");
+    config[3] = status_of_contact("5\0");
+    config[4] = status_of_contact("16\0");
+
+    if (!rogue_exists) {
+        if (config[1]) {
+            *scenario = CONFIG1_NO_ROGUE;
+        } else if (config[2]) {
+            *scenario = CONFIG2_NO_ROGUE;
+        } else if (config[3]) {
+            *scenario = CONFIG3_NO_ROGUE;
+        } else if (config[4]) {
+            *scenario = CONFIG4_NO_ROGUE;
+        } else {
+            *scenario = UNKNOWN;
+        }
+    } else {
+        if (config[1]) {
+            *scenario = CONFIG1_ROGUE;
+        } else if (config[2]) {
+            *scenario = CONFIG2_ROGUE;
+        } else if (config[3]) {
+            *scenario = CONFIG3_ROGUE;
+        } else if (config[4]) {
+            *scenario = CONFIG4_ROGUE;
+        } else {
+            *scenario = UNKNOWN;
+        }
+    }
+}
+
+
 void train_process(PROCESS self, PARAM param)
 {
     int window_id;
+    TRAIN_CONFIGURATION train_scenario;
 
     window_id = wm_create(5, 5, 40, 15);
     wm_print(window_id, "TOS Train Application\n");
 
     /* Ensure rogue train if present doesn't run of track */
     set_outer_loop_switches();
+    identify(&train_scenario);
 
     while(1);
 }
