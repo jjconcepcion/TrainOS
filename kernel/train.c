@@ -428,6 +428,8 @@ void config3_route_plan()
     set_train_speed("5\0");
     while (status_of_contact("11\0") == OCCUPIED );
     set_switch("8\0", "G\0");
+    while (status_of_contact("7\0") == UNOCCUPIED);
+    set_train_speed("4\0");
     while (status_of_contact("5\0") == UNOCCUPIED);
     set_train_speed("0\0");
 }
