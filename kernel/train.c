@@ -7,6 +7,8 @@
 #define CMD_TERMINATOR '\015'
 #define OCCUPIED 1
 #define UNOCCUPIED 0
+#define ROGUE_SEARCH_DURATION 12
+#define ROGUE_SEARCH_LOCATION "7\0"
 
 
 void strcat(char *dest, char *src)
@@ -159,6 +161,29 @@ void set_outer_loop_switches()
 }
 
 
+/*
+ * Monitor a track segment [ROUGE_SEARCH_LOCATION] for a duration of time
+ * [ROGUE_SEARCH_DURATION] with the intention of detecting the presence of
+ * a rogue train car.
+ *
+ * returns 1 if rogue train is present, otherwise 0.
+ */
+int detect_rogue_train() {
+    char *monitoring = ROGUE_SEARCH_LOCATION;
+    int duration, detected;
+
+    detected = 0;
+    duration = ROGUE_SEARCH_DURATION;
+    while (duration > 0) {
+        if (detected = (status_of_contact(monitoring) == OCCUPIED))
+            break;
+        duration--;
+    }
+
+    return detected;
+}
+
+
 void train_process(PROCESS self, PARAM param)
 {
     int window_id;
@@ -169,8 +194,7 @@ void train_process(PROCESS self, PARAM param)
     /* Ensure rogue train if present doesn't run of track */
     set_outer_loop_switches();
 
-    while(1) {
-    }
+    while(1);
 }
 
 
