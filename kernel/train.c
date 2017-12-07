@@ -516,7 +516,8 @@ void config2_rogue_route_plan()
     set_train_speed("5\0");
     set_switch("8\0", "R\0");
     set_train_speed("4\0");
-    while (status_of_contact("11\0") == UNOCCUPIED);
+    while (status_of_contact("13\0") == UNOCCUPIED);
+    while (status_of_contact("13\0") == OCCUPIED);
     set_switch("8\0", "G\0");
     while (status_of_contact("12\0") == UNOCCUPIED);
     set_train_speed("0\0");
@@ -529,6 +530,7 @@ void config2_rogue_route_plan()
  */
 void config3_rogue_route_plan()
 {
+
 }
 
 
