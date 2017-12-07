@@ -205,7 +205,7 @@ int status_of_contact(char *id)
  */
 void set_outer_loop_switches()
 {
-    train_log("\nSetting switches for outer loop...\n");
+    train_log("\n>>Setting switches for outer loop...\n");
     set_switch("5\0", "G\0");
     set_switch("8\0", "G\0");
     set_switch("9\0", "R\0");
@@ -229,12 +229,13 @@ int detect_rogue_train()
     detected = 0;
     duration = ROGUE_SEARCH_DURATION;
     while (duration > 0) {
+        train_log("\n>>Monitor track segment for rogue train");
         if (detected = (status_of_contact(monitoring) == OCCUPIED))
             break;
         duration--;
     }
 
-    train_log("\nRogue train: ");
+    train_log("\n>>Rogue train: ");
     if (!detected) train_log(" NOT ");
     train_log("DETECTED\n");
 
@@ -247,7 +248,7 @@ int detect_rogue_train()
  */
 void identify(TRAIN_CONFIGURATION *scenario)
 {
-    train_log("\nIndetifying train configuration...\n");
+    train_log("\n>>Indetifying train configuration...\n");
 
     int config[NUM_TRAIN_START_POSITIONS+1];
     int rogue_exists;
@@ -258,7 +259,7 @@ void identify(TRAIN_CONFIGURATION *scenario)
     config[3] = status_of_contact("5\0");
     config[4] = status_of_contact("16\0");
 
-    train_log("Scenario: ");
+    train_log("\n>>Scenario: ");
     if (!rogue_exists) {
         if (config[1]) {
             *scenario = CONFIG1_NO_ROGUE;
@@ -298,7 +299,7 @@ void identify(TRAIN_CONFIGURATION *scenario)
 
 void execute_route_for(TRAIN_CONFIGURATION scenario)
 {
-    train_log("\nExecuting train route...\n");
+    train_log("\n>>Executing train route...\n");
     switch (scenario) {
         case CONFIG1_NO_ROGUE:
             config1_route_plan();
