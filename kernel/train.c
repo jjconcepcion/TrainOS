@@ -531,7 +531,7 @@ void config2_rogue_route_plan()
 void config3_rogue_route_plan()
 {
     set_switch("6\0", "G\0");
-    set_switch("7\0", "G\0");
+    set_switch("7\0", "R\0");
     set_switch("2\0", "R\0");
     set_switch("8\0", "R\0");
     set_switch("4\0", "R\0");
@@ -541,18 +541,24 @@ void config3_rogue_route_plan()
     while (status_of_contact("10\0") == UNOCCUPIED);
     set_switch("5\0", "R\0");
     while (status_of_contact("3\0") == UNOCCUPIED);
-    set_switch("1\0", "R\0");
     set_switch("5\0", "G\0");
     while (status_of_contact("11\0") == OCCUPIED);
     set_train_speed("0\0");
-    change_direction();
-    while (status_of_contact("10\0") == UNOCCUPIED);
+    while (status_of_contact("3\0") == UNOCCUPIED);
     set_train_speed("4\0");
-    while (status_of_contact("9\0") == UNOCCUPIED);
-    set_switch("7\0", "R\0");
+    while (status_of_contact("14\0") == UNOCCUPIED);
+    set_train_speed("0\0");
+    change_direction();
+    set_train_speed("5\0");
+    while (status_of_contact("3\0") == UNOCCUPIED);
+    set_switch("1\0", "R\0");
+    set_train_speed("4\0");
+    while (status_of_contact("6\0") == UNOCCUPIED);
+    set_train_speed("0\0");
+    change_direction();
+    set_train_speed("4\0");
     while (status_of_contact("5\0") == UNOCCUPIED);
     set_train_speed("0\0");
-    set_switch("4\0", "G\0");
 
 }
 
