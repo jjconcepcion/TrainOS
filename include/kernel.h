@@ -187,7 +187,7 @@ void init_ipc();
 
 
 
-typedef struct 
+typedef struct
 {
     unsigned short offset_0_15;
     unsigned short selector;
@@ -219,7 +219,7 @@ void init_interrupts ();
 
 extern PORT timer_port;
 
-typedef struct _Timer_Message 
+typedef struct _Timer_Message
 {
     int num_of_ticks;
 } Timer_Message;
@@ -245,7 +245,7 @@ void outportb (unsigned short port, unsigned char value);
 
 extern PORT com_port;
 
-typedef struct _COM_Message 
+typedef struct _COM_Message
 {
     char* output_buffer;
     char* input_buffer;
